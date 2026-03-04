@@ -49,8 +49,31 @@ def get_connection(db_path: Path = DUCKDB_PATH, read_only: bool = True) -> duckd
     return duckdb.connect(str(db_path), read_only=read_only)
 
 
+def ensure_warehouse_ready(db_path: Path = DUCKDB_PATH) -> None:
+    required_tables = {"fact_salesline", "fact_purchaseline", "fact_inventory_events", "fact_margin_monthly", "dim_date", "dim_product"}
+
+    if not db_path.exists():
+        build_warehouse(duckdb_path=db_path, drop_invalid_purchase_rows=True)
+        return
+
+    try:
+        conn = duckdb.connect(str(db_path), read_only=True)
+        try:
+            tables_df = conn.execute("SHOW TABLES").fetchdf()
+        finally:
+            conn.close()
+    except Exception:
+        build_warehouse(duckdb_path=db_path, drop_invalid_purchase_rows=True)
+        return
+
+    tables = set(tables_df["name"].astype(str).str.lower().tolist()) if not tables_df.empty else set()
+    if not required_tables.issubset(tables):
+        build_warehouse(duckdb_path=db_path, drop_invalid_purchase_rows=True)
+
+
 @st.cache_data(show_spinner=False)
 def load_semantic_sales(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
+    ensure_warehouse_ready(Path(db_path_str))
     conn = duckdb.connect(db_path_str, read_only=True)
     try:
         query = """
@@ -95,6 +118,7 @@ def load_semantic_sales(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
 
 @st.cache_data(show_spinner=False)
 def load_semantic_purchases(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
+    ensure_warehouse_ready(Path(db_path_str))
     conn = duckdb.connect(db_path_str, read_only=True)
     try:
         query = """
@@ -136,6 +160,7 @@ def load_semantic_purchases(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame
 
 @st.cache_data(show_spinner=False)
 def load_margin_monthly(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
+    ensure_warehouse_ready(Path(db_path_str))
     conn = duckdb.connect(db_path_str, read_only=True)
     try:
         query = """
@@ -178,6 +203,7 @@ def load_margin_monthly(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
 
 @st.cache_data(show_spinner=False)
 def load_inventory_ledger(db_path_str: str = str(DUCKDB_PATH)) -> pd.DataFrame:
+    ensure_warehouse_ready(Path(db_path_str))
     conn = duckdb.connect(db_path_str, read_only=True)
     try:
         query = """

@@ -159,3 +159,52 @@ streamlit run app/streamlit_app.py
 ```bash
 python -m pytest -q
 ```
+
+## Deploy
+
+### Option A: Streamlit Community Cloud (fastest)
+
+1. Push this repo to GitHub.
+2. Go to [share.streamlit.io](https://share.streamlit.io/) and create a new app.
+3. Set:
+   - Repository: `Naah-sec/Bi` (or your fork)
+   - Branch: `main`
+   - Main file path: `app/streamlit_app.py`
+4. Deploy.
+
+Notes:
+- On first boot, the app auto-builds `warehouse.duckdb` if missing.
+- Keep `data/Sales_TD.xlsx` and purchases files in the repo (or adjust env vars).
+
+### Option B: Docker deploy (Render/Railway/Fly/VM)
+
+This repository now includes:
+- `Dockerfile`
+- `.dockerignore`
+- `scripts/start_streamlit.sh`
+
+The startup script:
+- builds warehouse automatically (`AUTO_BUILD_WAREHOUSE=true` by default)
+- starts Streamlit on `0.0.0.0:$PORT`
+
+Local container test:
+
+```bash
+docker build -t bi-dashboard .
+docker run --rm -p 8501:8501 bi-dashboard
+```
+
+Open `http://localhost:8501`.
+
+### Render quick steps (Docker Web Service)
+
+1. Create `Web Service` on Render from your GitHub repo.
+2. Environment: `Docker`.
+3. No custom start command needed (Docker `CMD` is used).
+4. Add env vars if needed:
+   - `EXCEL_PATH=data/Sales_TD.xlsx`
+   - `PURCHASES_EXCEL_PATH=data/Purchases_TD.xlsx`
+   - `PURCHASES_CSV_PATH=data/PurchasesRaw.csv`
+   - `DUCKDB_PATH=data/warehouse.duckdb`
+   - `AUTO_BUILD_WAREHOUSE=true`
+5. Deploy.
