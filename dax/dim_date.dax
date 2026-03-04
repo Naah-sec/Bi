@@ -1,0 +1,13 @@
+dim_date =
+VAR MinDate =
+    MINX ( ALL ( fact_SalesLine ), fact_SalesLine[Date.CMD] )
+VAR MaxDate =
+    MAXX ( ALL ( fact_SalesLine ), fact_SalesLine[Date.CMD] )
+RETURN
+    ADDCOLUMNS (
+        CALENDAR ( MinDate, MaxDate ),
+        "Year", YEAR ( [Date] ),
+        "MonthNo", MONTH ( [Date] ),
+        "Month", FORMAT ( [Date], "MMMM" ),
+        "YearMonth", FORMAT ( [Date], "YYYY-MM" )
+    )

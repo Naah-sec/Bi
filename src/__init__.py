@@ -1,0 +1,2 @@
+"""BI analytics project package."""
+

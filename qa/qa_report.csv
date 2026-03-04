@@ -1,0 +1,5 @@
+check,status,failed_rows,details
+MontantTTC ~= MontantHT + Taxe,PASS,0,tolerance=0.01
+No null dates,PASS,0,Date.CMD parsed with ISO + fallback
+Positive quantities,PASS,0,Qty > 0
+Category mapping coverage by ProductPrefix,PASS,0,Missing prefixes: None

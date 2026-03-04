@@ -1,0 +1,29 @@
+CA HT =
+SUM ( fact_SalesLine[Montant HT] )
+
+Taxe =
+SUM ( fact_SalesLine[Taxe] )
+
+CA TTC =
+SUM ( fact_SalesLine[Montant TTC] )
+
+Quantités =
+SUM ( fact_SalesLine[Qté] )
+
+CA HT YTD =
+TOTALYTD ( [CA HT], dim_date[Date] )
+
+CA HT LY =
+CALCULATE ( [CA HT], SAMEPERIODLASTYEAR ( dim_date[Date] ) )
+
+CA HT YoY % =
+DIVIDE ( [CA HT] - [CA HT LY], [CA HT LY] )
+
+Rank Product by CA HT =
+RANKX ( ALLSELECTED ( dim_product[Code Produit] ), [CA HT], , DESC, DENSE )
+
+Rank Customer by CA HT =
+RANKX ( ALLSELECTED ( dim_customer[CustomerKey] ), [CA HT], , DESC, DENSE )
+
+Rank Wilaya by CA HT =
+RANKX ( ALLSELECTED ( dim_wilaya[Wilaya] ), [CA HT], , DESC, DENSE )
